@@ -178,6 +178,26 @@ Run this helper as the `vyos` user, **without `sudo`**. The script invokes `sudo
 
 This is separate from the automatic wired DHCP and SSH setup. Run it only when an access point, DHCP server, DNS forwarding, and NAT are required.
 
+### Connect the wired LAN port to the wireless access point
+
+The Orange Pi 5 Plus bridge helper joins `eth1` and the existing `wlan0` access point in `br0`. Wired and wireless clients share the existing `10.3.141.0/24` network, gateway `10.3.141.50`, and DHCP pool. `eth0` remains the WAN port. Run the wireless access point helper first, including its Ethernet WAN configuration.
+
+Run as the `vyos` user, **without `sudo`**, outside a configuration session. Preview the changes first:
+
+```bash
+/home/vyos/setup-lan-ap-bridge.sh
+```
+
+Apply the reviewed changes:
+
+```bash
+/home/vyos/setup-lan-ap-bridge.sh --apply
+```
+
+The helper checks the existing AP, DHCP, firewall and NAT configuration, moves the gateway address and firewall interface assignment to `br0`, binds DHCP to the bridge, and saves a configuration backup before committing. Unexpected configurations are rejected for manual review. Use SSH through `eth0`: Wi-Fi may disconnect briefly, and STP can take about 30 seconds to begin forwarding. Connect the LAN client to `eth1`.
+
+This helper is included only in new Orange Pi 5 Plus builds. Existing published images are unchanged; the [helper source](https://github.com/frogro/vyos-arm64-board-builder/blob/main/tools/common-firstboot/setup-lan-ap-bridge.sh) is available for those installations. Existing user-created copies in `/home/vyos` are preserved during updates.
+
 ### Configure a modem
 
 Run this helper from the `vyos` account **with `sudo`**. Unlike the AP and locale helpers, the modem setup script explicitly requires root privileges.
